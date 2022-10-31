@@ -8,7 +8,7 @@ public class DetectKey : MonoBehaviour
     public GameObject useKeyUI;
     private void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.CompareTag("Key") && !GameManager.instance.keyGrabbed)
+        if(other.gameObject.CompareTag("Key") && GameManager.instance.keyGrabbed)
         {
             other.gameObject.transform.position = this.transform.position;
             other.gameObject.transform.rotation = this.transform.rotation;

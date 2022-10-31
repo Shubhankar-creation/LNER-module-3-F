@@ -26,8 +26,6 @@ public class UiManager : MonoBehaviour
 
     private AudioSource canvasPopSound;
 
-    private bool pickExtActive;
-
     private bool timeStarted;
 
     void Start()
@@ -43,25 +41,13 @@ public class UiManager : MonoBehaviour
         {
             GameManager.instance.totalTime += Time.deltaTime;
         }
-        if(!pickExtActive && pickTheExt.active)
-        {
-            pickExtActive = true;
-            StartCoroutine(pickUpExtActive());
-        }
-    }
-
-    IEnumerator pickUpExtActive()
-    {
-        yield return new WaitForSeconds(5f);
-        pickTheExt.SetActive(false);
-        grabPin.SetActive(true);
-
+        
     }
     IEnumerator setWelcomeWindow()
     {
         welcomeWindow.SetActive(true);
         canvasPopSound.Play();
-        yield return new WaitForSeconds(10f);
+        yield return new WaitForSeconds(5f);
         welcomeWindow.SetActive(false);
         cameraFollow._unmovableCanvasTransform = pinchTutorial.transform;
         pinchTutorial.SetActive(true);
@@ -156,6 +142,11 @@ public class UiManager : MonoBehaviour
         reportText.transform.GetChild(5).GetComponent<TextMeshProUGUI>().text = (timeSpend / 60).ToString("00") + ":" + (timeSpend % 60).ToString("00");
     }
 
+    public void OnPassOff()
+    {
+        pickTheExt.SetActive(false);
+        grabPin.SetActive(true);
+    }
     public void OnResetClick()
     {
         SceneManager.LoadScene(0);

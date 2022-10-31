@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    public Transform rightAnchor;
+    public Transform rightAnchor, leftAnchor;
     public GameObject controllers;
 
     public GameObject rayVisual;
@@ -98,9 +98,13 @@ public class GameManager : MonoBehaviour
     public void OnKeyGrabbed()
     {
         keyGrabbed = true;
-    }
-    public void OnKeyReleased()
-    {
-        keyGrabbed = false;
+        if(OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.4f)
+        {
+            this.transform.parent = rightAnchor.transform;
+        }
+        else
+        {
+            this.transform.parent = leftAnchor.transform;
+        }
     }
 }

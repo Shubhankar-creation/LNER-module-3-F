@@ -70,8 +70,12 @@ public class AlertManager : MonoBehaviour
     public void OnNumberSelect(string textGO)
     {
         len++;
-        GameManager.instance.dialedNumber += textGO;
-        keypadScreen.GetComponent<TextMeshProUGUI>().text = GameManager.instance.dialedNumber;
+        if(len<=10)
+        {
+            GameManager.instance.dialedNumber += textGO;
+            keypadScreen.GetComponent<TextMeshProUGUI>().text = GameManager.instance.dialedNumber;
+        }
+        
     }
 
     public void OnCallDialed()
@@ -98,7 +102,8 @@ public class AlertManager : MonoBehaviour
     {
         if(len !=0 )
             --len;
-        keypadScreen.GetComponent<TextMeshProUGUI>().text = GameManager.instance.dialedNumber.Substring(0, len);
+        GameManager.instance.dialedNumber.Substring(0, len);
+        keypadScreen.GetComponent<TextMeshProUGUI>().text = GameManager.instance.dialedNumber;
     }
     IEnumerator emergencyCalled()
     {
