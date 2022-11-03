@@ -15,22 +15,19 @@ public class AlertManager : MonoBehaviour
     public GameObject dialError;
     public GameObject fireLocation;
     public GameObject fireType;
+    public GameObject useCloth;
 
     public GameObject selectExtUI;
 
     private Material alarmMat;
 
     private int len = 0;
-    public void OnAlarmHover(GameObject alarm)
+    public void OnAlarmHover(bool val)
     {
-        alarmMat = alarm.GetComponent<MeshRenderer>().material;
-        alarm.GetComponent<MeshRenderer>().material.color = Color.green;
+        if (GameManager.instance.onAlarmTP)
+            breakGlass.SetActive(val);
     }
 
-    public void OnAlarmUnhover(GameObject alarm)
-    {
-        alarm.GetComponent<MeshRenderer>().material.color = alarmMat.color;
-    }
     public void OnGlassSelect()
     {
         GameManager.instance.canAlert = true;
@@ -49,28 +46,33 @@ public class AlertManager : MonoBehaviour
         {
             this.GetComponent<AudioSource>().Play();
 
-            GameManager.instance.alertPressed = true;
+            GameManager.instance.alertDone = true;
+
             pressAlert.SetActive(false);
 
             GameManager.instance.alarmTime = GameManager.instance.totalTime;
         }
     }
 
-    public void OnPhoneHover()
+    public void OnPhoneHover( bool val)
     {
-        dialError.SetActive(false);
-        phone.SetActive(true);
+        if (GameManager.instance.onPhoneTP)
+            phone.SetActive(val);
     }
-
     public void OnPhoneSelect()
     {
         phone.SetActive(false);
     }
-
+    
+    public void OnClothHoverUnhover(bool val)
+    {
+        if (GameManager.instance.onClothTP)
+            useCloth.SetActive(val);
+    }
     public void OnNumberSelect(string textGO)
     {
         len++;
-        if(len<=10)
+        if(len<=3)
         {
             GameManager.instance.dialedNumber += textGO;
             keypadScreen.GetComponent<TextMeshProUGUI>().text = GameManager.instance.dialedNumber;
@@ -88,7 +90,6 @@ public class AlertManager : MonoBehaviour
         else
         {
             dialError.SetActive(true);
-            GameManager.instance.dialedNumber = "";
         }
     }
 
@@ -96,14 +97,18 @@ public class AlertManager : MonoBehaviour
     {
         GameManager.instance.dialedNumber = "";
         keypadScreen.GetComponent<TextMeshProUGUI>().text = GameManager.instance.dialedNumber;
+        len = 0;
     }
 
     public void OnPrevSelect()
     {
         if(len !=0 )
+        {
             --len;
-        GameManager.instance.dialedNumber.Substring(0, len);
-        keypadScreen.GetComponent<TextMeshProUGUI>().text = GameManager.instance.dialedNumber;
+            GameManager.instance.dialedNumber = GameManager.instance.dialedNumber.Substring(0, len);
+            keypadScreen.GetComponent<TextMeshProUGUI>().text = GameManager.instance.dialedNumber;
+        }
+            
     }
     IEnumerator emergencyCalled()
     {
@@ -121,7 +126,6 @@ public class AlertManager : MonoBehaviour
 
     public void OnLnerAcademySelect()
     {
-        Debug.Log("presses");
         fireLocation.SetActive(false);
         fireType.SetActive(true);
     }
@@ -133,12 +137,27 @@ public class AlertManager : MonoBehaviour
     }
     public void OnElectricTypeSelect()
     {
+        GameManager.instance.phoneDone = true;
         fireType.SetActive(false);
     }
 
     public void OnClothTpSelect()
     {
-        GameManager.instance.inClothPlace = true;
+        GameManager.instance.onClothTP = true;
+        GameManager.instance.onAlarmTP = false;
+        GameManager.instance.onPhoneTP = false;
+    }
+    public void OnAlarmTpSelect()
+    {
+        GameManager.instance.onClothTP = false;
+        GameManager.instance.onAlarmTP = true;
+        GameManager.instance.onPhoneTP = false;
+    }
+    public void OnPhoneTpSelect()
+    {
+        GameManager.instance.onClothTP = false;
+        GameManager.instance.onAlarmTP = false;
+        GameManager.instance.onPhoneTP = true;
     }
     public void OnFightSelect()
     {
@@ -151,4 +170,20 @@ public class AlertManager : MonoBehaviour
         GameManager.instance.totalTime = 0;
     }
 
+    int windowCount = 0;
+    public void OnWindowSelect()
+    {
+        windowCount++;
+        if (windowCount == 2)
+        {
+            GameManager.instance.windowsDone = true;
+            GameManager.instance.windowTime = GameManager.instance.maskTime + GameManager.instance.totalTime;
+        }
+    }
+
+    public void OnDoorSelect()
+    {
+        GameManager.instance.doorDone = true;
+        GameManager.instance.windowTime = GameManager.instance.maskTime + GameManager.instance.totalTime;
+    }
 }

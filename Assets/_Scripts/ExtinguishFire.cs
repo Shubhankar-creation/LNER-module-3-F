@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class ExtinguishFire : MonoBehaviour
 {
-    private bool canExt;
     public GameObject Fire;
     public GameObject ReportUI;
     public GameObject wrongExtUI;
@@ -18,21 +17,20 @@ public class ExtinguishFire : MonoBehaviour
     private float bloodTime;
     public void Update()
     {
-        if (canExt && GameManager.instance.pinRemoved && OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.8f)
+        if (GameManager.instance.canExt && GameManager.instance.pinRemoved && OVRInput.Get(OVRInput.Button.One))
         {
             if(GameManager.instance.particles.CompareTag("CO2"))
             {
                 ReduceFire(0.0046f);
-                GameManager.instance.extinguisherSize -= Time.deltaTime;
             }
             else if (GameManager.instance.particles.CompareTag("Dry"))
             {
-                ReduceFire(0.0025f);
-                GameManager.instance.extinguisherSize -= Time.deltaTime;
+                ReduceFire(0.0027f);
             }
             else
             {
-                if(bloodTime < GameManager.instance.wrongExtTime)
+                bloodTime += Time.deltaTime;
+                if (bloodTime < GameManager.instance.wrongExtTime)
                 {
                     var newColor = new Color(1.0f, 0f, 0f, bloodImage.color.a + 0.005f);
                     bloodImage.color = newColor;
@@ -41,9 +39,14 @@ public class ExtinguishFire : MonoBehaviour
                 {
                     DisplayReport();
                     wrongExtUI.SetActive(true);
+                    GameManager.instance.canExt = false;
                 }
-                bloodTime += Time.deltaTime;
             }
+        }
+        else if(GameManager.instance.extinguisherSize <=0)
+        {
+            DisplayReport();
+            ReportUI.SetActive(true);
         }
     }
 
@@ -62,12 +65,15 @@ public class ExtinguishFire : MonoBehaviour
 */
                 Fire.GetComponent<AudioSource>().Stop();
 
-                GameManager.instance.rayVisual.SetActive(true);
+                GameManager.instance.rightRayVisual.SetActive(true);
 
                 GameManager.instance.fireTime = GameManager.instance.totalTime;
 
+                GameManager.instance.fireDone = true;
+
                 DisplayReport();
                 ReportUI.SetActive(true);
+                GameManager.instance.canExt = false;
                 this.gameObject.GetComponent<ExtinguishFire>().enabled = false;
             }
         }
@@ -75,34 +81,100 @@ public class ExtinguishFire : MonoBehaviour
 
     public void DisplayReport()
     {
+        int alertPercent = 0, callPercent = 0, maskPercent = 0, firePercent = 0;
 
-        int alertPercent = 100 - (int)GameManager.instance.alarmTime * GameManager.instance.averageAlert / 100;
-        reportText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.alarmTime / 60).ToString("00") + ":" + ((int)GameManager.instance.alarmTime % 60).ToString("00") + "/" + alertPercent.ToString() + "%";
+        if (GameManager.instance.alertDone)
+        {
+            if (GameManager.instance.averageAlert >= (int)GameManager.instance.alarmTime)
+            {
+                alertPercent = 100;
+            }
+            else
+            {
+                alertPercent = 100 - ((int)GameManager.instance.alarmTime - GameManager.instance.averageAlert) / GameManager.instance.averageAlert;
+            }
 
-        int callPercent = 100 -  (int)GameManager.instance.phoneTime * GameManager.instance.averageCall / 100;
-        reportText.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.phoneTime / 60).ToString("00") + ":" + ((int)GameManager.instance.phoneTime % 60).ToString("00") + "/" + callPercent.ToString() + "%";
+            reportText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.alarmTime / 60).ToString("00") + ":" + ((int)GameManager.instance.alarmTime % 60).ToString("00") + "/" + alertPercent.ToString() + "%";
+            GameManager.instance.fireReportUIs.transform.GetChild(0).gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.instance.fireReportUIs.transform.GetChild(1).gameObject.SetActive(true);
+            reportText.transform.GetChild(0).gameObject.SetActive(false);
+        }
 
-        int maskPercent = 100 - (int)GameManager.instance.maskTime * GameManager.instance.averageMask / 100;
-        reportText.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.maskTime / 60).ToString("00") + ":" + ((int)GameManager.instance.maskTime % 60).ToString("00") + "/" + maskPercent.ToString() + "%";
+        if (GameManager.instance.phoneDone)
+        {
+            if (GameManager.instance.averageCall >= (int)GameManager.instance.phoneTime)
+            {
+                callPercent = 100;
+            }
+            else
+            {
+                callPercent = 100 - ((int)GameManager.instance.phoneTime - GameManager.instance.averageCall) / GameManager.instance.averageCall;
+            }
+            reportText.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.phoneTime / 60).ToString("00") + ":" + ((int)GameManager.instance.phoneTime % 60).ToString("00") + "/" + callPercent.ToString() + "%";
+            GameManager.instance.fireReportUIs.transform.GetChild(2).gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.instance.fireReportUIs.transform.GetChild(3).gameObject.SetActive(true);
+            reportText.transform.GetChild(1).gameObject.SetActive(false);
+        }
 
-        int firePercent = 100 - (int)GameManager.instance.totalTime * GameManager.instance.averageFire / 100;
-        reportText.transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.totalTime / 60).ToString("00") + ":" + ((int)GameManager.instance.totalTime % 60).ToString("00") + "/" + firePercent.ToString() + "%"; //for evac
+        if (GameManager.instance.maskDone)
+        {
+            if(GameManager.instance.averageMask >= (int)GameManager.instance.maskTime)
+            {
+                maskPercent = 100;
+            }    
+            else
+            {
+                maskPercent = 100 - ((int)GameManager.instance.maskTime - GameManager.instance.averageMask) / GameManager.instance.averageMask;
+            }
+            reportText.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.maskTime / 60).ToString("00") + ":" + ((int)GameManager.instance.maskTime % 60).ToString("00") + "/" + maskPercent.ToString() + "%";
+            GameManager.instance.fireReportUIs.transform.GetChild(4).gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.instance.fireReportUIs.transform.GetChild(5).gameObject.SetActive(true);
+            reportText.transform.GetChild(2).gameObject.SetActive(false);
+        }
 
-        int totalscore =  (int)(((int)GameManager.instance.alarmTime + (int)GameManager.instance.phoneTime + (int)GameManager.instance.maskTime + (int)GameManager.instance.totalTime) / 4f);
+        if (GameManager.instance.fireDone)
+        {
+            if(GameManager.instance.averageFire >= (int)GameManager.instance.totalTime)
+            {
+                firePercent = 100;
+            }
+            else
+            {
+                firePercent = 100 - ((int)GameManager.instance.totalTime - GameManager.instance.averageFire) / GameManager.instance.averageFire;
+            }
+            reportText.transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.totalTime / 60).ToString("00") + ":" + ((int)GameManager.instance.totalTime % 60).ToString("00") + "/" + firePercent.ToString() + "%"; //for evac
+            GameManager.instance.fireReportUIs.transform.GetChild(6).gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.instance.fireReportUIs.transform.GetChild(7).gameObject.SetActive(true);
+            reportText.transform.GetChild(3).gameObject.SetActive(false);
+        }
 
-        int percentage = 100 - totalscore * GameManager.instance.averageFight / 100;
-        reportText.transform.GetChild(4).GetComponent<TextMeshProUGUI>().text = percentage.ToString() + "%";
+        //total Score
+        int totalScore = (alertPercent + callPercent + maskPercent + firePercent) / 4;
+        reportText.transform.GetChild(4).GetComponent<TextMeshProUGUI>().text = totalScore.ToString() + "%";
 
+        //total Time
         int timeSpend = (int)GameManager.instance.maskTime + (int)GameManager.instance.totalTime;
         reportText.transform.GetChild(5).GetComponent<TextMeshProUGUI>().text = (timeSpend / 60).ToString("00") + ":" + (timeSpend % 60).ToString("00");
     }
     public void ExtenguishingFire()
     {
-        canExt = true;
+        GameManager.instance.canExt = true;
     }
 
     public void OnUnhoverFire()
     {
-        canExt = false;
+        GameManager.instance.canExt = false;
     }
 }

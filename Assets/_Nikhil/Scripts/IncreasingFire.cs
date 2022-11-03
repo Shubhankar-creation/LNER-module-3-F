@@ -10,7 +10,11 @@ public class IncreasingFire : MonoBehaviour
     private GameObject _fireTwo;
     private bool evacuateFire = false;
 
-    public void Evacuate() => evacuateFire = true;
+    public void Evacuate()
+    {
+        evacuateFire = true;
+        GameManager.instance.ovrManager.isInsightPassthroughEnabled = false;
+    }
 
     public void FireOne()
     {

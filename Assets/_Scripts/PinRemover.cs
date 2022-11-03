@@ -12,7 +12,7 @@ public class PinRemover : MonoBehaviour
     {
         if(other.gameObject.CompareTag("Pin"))
         {
-            if(OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.2f)
+            if(OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) > 0.2f)
             {
                 other.gameObject.transform.parent = null;
                 other.gameObject.GetComponent<Rigidbody>().isKinematic = false;

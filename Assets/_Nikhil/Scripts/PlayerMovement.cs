@@ -78,6 +78,9 @@ public class PlayerMovement : MonoBehaviour
     public void Shouted()
     {
         _hasShouted = true;
+        GameManager.instance.shoutDone = true;
+
+        GameManager.instance.shoutTime = GameManager.instance.maskTime + GameManager.instance.totalTime;
         DoRun();
     }
 }

@@ -33,7 +33,7 @@ public class HoseToExtinguisher : MonoBehaviour
 
         //Debug.LogError(childrenCount);
         Transform childLast = transform.GetChild(1).GetChild(childrenCount - 2);
-        childLast.transform.parent = GameManager.instance.rightAnchor.transform;
+        childLast.transform.parent = GameManager.instance.leftAnchor.transform;
         childLast.GetComponent<Rigidbody>().isKinematic = true;
         childLast.transform.localPosition = new Vector3(0, 0, 0);
         childLast.transform.localRotation = Quaternion.Euler(0, 0, 0);

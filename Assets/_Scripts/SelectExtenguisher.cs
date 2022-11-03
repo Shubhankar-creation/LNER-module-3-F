@@ -75,7 +75,11 @@ public class SelectExtenguisher : MonoBehaviour
 
     public void EndHand(GameObject particles)
     {
-        GameManager.instance.rayVisual.SetActive(true);
+        GameManager.instance.ovrManager.isInsightPassthroughEnabled = true;
+
+        GameManager.instance.leftRayVisual.SetActive(true);
+        GameManager.instance.leftRayVisual.SetActive(true);
+
         goBackToModuleUI.SetActive(true);
 
         GameManager.instance.particles = particles;

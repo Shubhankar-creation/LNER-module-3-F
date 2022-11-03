@@ -103,6 +103,8 @@ public class UiManager : MonoBehaviour
         selectCloth.SetActive(false);
         GetBackToFire.SetActive(true);
 
+        GameManager.instance.maskDone = true;
+
         GameManager.instance.maskTime = GameManager.instance.totalTime;
 
         StartCoroutine(hideUI(GetBackToFire));
@@ -110,7 +112,7 @@ public class UiManager : MonoBehaviour
 
     public void OnFireLocation()
     {
-        if(GameManager.instance.inClothPlace == true)
+        if(GameManager.instance.onClothTP == true)
             Precautions.SetActive(true);
     }
     IEnumerator hideUI(GameObject UI)
@@ -119,36 +121,159 @@ public class UiManager : MonoBehaviour
         UI.SetActive(false);
     }
 
-    public void DisplayReport(GameObject reportText)
+    public void DisplayEvacReport(GameObject reportText)
     {
-        int alertPercent = 100 - (int)GameManager.instance.alarmTime * GameManager.instance.averageAlert / 100;
-        reportText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.alarmTime / 60).ToString("00") + ":" + ((int)GameManager.instance.alarmTime % 60).ToString("00") + "/" + alertPercent.ToString() + "%";
+        int alertPercent = 0, callPercent = 0, maskPercent = 0, firePercent = 0, windowPercent = 0, doorPercent = 0, shoutPercent = 0;
 
-        int callPercent = 100 - (int)GameManager.instance.phoneTime * GameManager.instance.averageCall / 100;
-        reportText.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.phoneTime / 60).ToString("00") + ":" + ((int)GameManager.instance.phoneTime % 60).ToString("00") + "/" + callPercent.ToString() + "%";
+        if (GameManager.instance.alertDone)
+        {
+            if (GameManager.instance.averageAlert >= (int)GameManager.instance.alarmTime)
+            {
+                alertPercent = 100;
+            }
+            else
+            {
+                alertPercent = 100 - ((int)GameManager.instance.alarmTime - GameManager.instance.averageAlert) / GameManager.instance.averageAlert;
+            }
 
-        int maskPercent = 100 - (int)GameManager.instance.maskTime * GameManager.instance.averageMask / 100;
-        reportText.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.maskTime / 60).ToString("00") + ":" + ((int)GameManager.instance.maskTime % 60).ToString("00") + "/" + maskPercent.ToString() + "%";
+            reportText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.alarmTime / 60).ToString("00") + ":" + ((int)GameManager.instance.alarmTime % 60).ToString("00") + "/" + alertPercent.ToString() + "%";
+            GameManager.instance.evacReportUIs.transform.GetChild(0).gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.instance.evacReportUIs.transform.GetChild(1).gameObject.SetActive(true);
+            reportText.transform.GetChild(0).gameObject.SetActive(false);
+        }
 
-        int shoutPercent = 100 - (int)GameManager.instance.totalTime * GameManager.instance.averageShout / 100;
-        reportText.transform.GetChild(4).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.totalTime / 60).ToString("00") + ":" + ((int)GameManager.instance.totalTime % 60).ToString("00") + "/" + shoutPercent.ToString() + "%"; //for evac
+        if (GameManager.instance.phoneDone)
+        {
+            if (GameManager.instance.averageCall >= (int)GameManager.instance.phoneTime)
+            {
+                callPercent = 100;
+            }
+            else
+            {
+                callPercent = 100 - ((int)GameManager.instance.phoneTime - GameManager.instance.averageCall) / GameManager.instance.averageCall;
+            }
+            reportText.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.phoneTime / 60).ToString("00") + ":" + ((int)GameManager.instance.phoneTime % 60).ToString("00") + "/" + callPercent.ToString() + "%";
+            GameManager.instance.evacReportUIs.transform.GetChild(2).gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.instance.evacReportUIs.transform.GetChild(3).gameObject.SetActive(true);
+            reportText.transform.GetChild(1).gameObject.SetActive(false);
+        }
 
-        int totalscore = (int)(((int)GameManager.instance.alarmTime + (int)GameManager.instance.phoneTime + (int)GameManager.instance.maskTime + (int)GameManager.instance.totalTime) / 4f);
+        //respiratory
+        if (GameManager.instance.maskDone)
+        {
+            if (GameManager.instance.averageMask >= (int)GameManager.instance.maskTime)
+            {
+                maskPercent = 100;
+            }
+            else
+            {
+                maskPercent = 100 - ((int)GameManager.instance.maskTime - GameManager.instance.averageMask) / GameManager.instance.averageMask;
+            }
+            reportText.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.maskTime / 60).ToString("00") + ":" + ((int)GameManager.instance.maskTime % 60).ToString("00") + "/" + maskPercent.ToString() + "%";
+            GameManager.instance.evacReportUIs.transform.GetChild(4).gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.instance.evacReportUIs.transform.GetChild(5).gameObject.SetActive(true);
+            reportText.transform.GetChild(2).gameObject.SetActive(false);
+        }
 
-        int percentage = 100 - totalscore * GameManager.instance.averageEvac / 100;
-        reportText.transform.GetChild(5).GetComponent<TextMeshProUGUI>().text = percentage.ToString() + "%";
+        //window
+        if(GameManager.instance.windowsDone)
+        {
+            if(GameManager.instance.averageWindow >= GameManager.instance.windowTime)
+            {
+                windowPercent = 100;
+            }
+            else
+            {
+                windowPercent = 100 - ((int)GameManager.instance.windowTime - GameManager.instance.averageWindow) / GameManager.instance.averageWindow;
+            }
+            reportText.transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.windowTime / 60).ToString("00") + ":" + ((int)GameManager.instance.windowTime % 60).ToString("00") + "/" + windowPercent.ToString() + "%";
+            GameManager.instance.evacReportUIs.transform.GetChild(6).gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.instance.evacReportUIs.transform.GetChild(7).gameObject.SetActive(true);
+            reportText.transform.GetChild(3).gameObject.SetActive(false);
+        }
 
+        //door
+        if (GameManager.instance.doorDone)
+        {
+            if (GameManager.instance.averageDoor >= GameManager.instance.doorTime)
+            {
+                doorPercent = 100;
+            }
+            else
+            {
+                doorPercent = 100 - ((int)GameManager.instance.doorTime - GameManager.instance.averageDoor) / GameManager.instance.averageDoor;
+            }
+            reportText.transform.GetChild(4).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.doorTime / 60).ToString("00") + ":" + ((int)GameManager.instance.doorTime % 60).ToString("00") + "/" + doorPercent.ToString() + "%";
+            GameManager.instance.evacReportUIs.transform.GetChild(8).gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.instance.evacReportUIs.transform.GetChild(9).gameObject.SetActive(true);
+            reportText.transform.GetChild(4).gameObject.SetActive(false);
+        }
+
+        //alert surrounding
+        if (GameManager.instance.shoutDone)
+        {
+            if (GameManager.instance.averageShout >= GameManager.instance.shoutTime)
+            {
+                shoutPercent = 100;
+            }
+            else
+            {
+                shoutPercent = 100 - ((int)GameManager.instance.shoutTime - GameManager.instance.averageShout) / GameManager.instance.averageShout;
+            }
+            reportText.transform.GetChild(5).GetComponent<TextMeshProUGUI>().text = ((int)GameManager.instance.shoutTime / 60).ToString("00") + ":" + ((int)GameManager.instance.shoutTime % 60).ToString("00") + "/" + shoutPercent.ToString() + "%"; //for evac
+            GameManager.instance.evacReportUIs.transform.GetChild(10).gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.instance.evacReportUIs.transform.GetChild(11).gameObject.SetActive(true);
+            reportText.transform.GetChild(5).gameObject.SetActive(false);
+        }
+
+        //total score        
+        int totalScore = (alertPercent + callPercent + maskPercent  + windowPercent + doorPercent + shoutPercent) / 6;
+
+        reportText.transform.GetChild(6).GetComponent<TextMeshProUGUI>().text = totalScore.ToString() + "%";
+
+        //total Time
         int timeSpend = (int)GameManager.instance.maskTime + (int)GameManager.instance.totalTime;
-        reportText.transform.GetChild(5).GetComponent<TextMeshProUGUI>().text = (timeSpend / 60).ToString("00") + ":" + (timeSpend % 60).ToString("00");
+        reportText.transform.GetChild(7).GetComponent<TextMeshProUGUI>().text = (timeSpend / 60).ToString("00") + ":" + (timeSpend % 60).ToString("00");
     }
 
     public void OnPassOff()
     {
         pickTheExt.SetActive(false);
         grabPin.SetActive(true);
+        GameManager.instance.leftRayVisual.SetActive(false);
+        GameManager.instance.rightRayVisual.SetActive(false);
+        GameManager.instance.ovrManager.isInsightPassthroughEnabled = false;
     }
     public void OnResetClick()
     {
+        GameManager.instance.totalTime = 0;
+        GameManager.instance.alarmTime = 0;
+        GameManager.instance.phoneTime = 0;
+        GameManager.instance.maskTime = 0;
+        GameManager.instance.windowTime = 0;
+        GameManager.instance.doorTime = 0;
+        GameManager.instance.shoutTime = 0;
+        GameManager.instance.fireTime = 0;
+        GameManager.instance.evacTime = 0;
+
         SceneManager.LoadScene(0);
     }
     public void OnExitClick()

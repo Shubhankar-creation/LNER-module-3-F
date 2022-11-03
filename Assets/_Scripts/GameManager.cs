@@ -6,11 +6,14 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
+    public GameObject fireReportUIs, evacReportUIs;
+
     public Transform rightAnchor, leftAnchor;
+    public Transform handRight, handLeft;
     public GameObject controllers;
 
-    public GameObject rayVisual;
-
+    public GameObject leftRayVisual, rightRayVisual;
+    public OVRManager ovrManager;
     public GameObject Rope;
     private bool ropeOn;
     public GameObject pickExtUI;
@@ -19,14 +22,18 @@ public class GameManager : MonoBehaviour
     public AudioClip popUI;
 
     public bool canAlert;
-    public bool alertPressed;
-
-    [HideInInspector]
-    public bool inClothPlace;
+    public bool alertDone;
+    public bool phoneDone;
+    public bool maskDone;
+    public bool fireDone;
+    public bool windowsDone;
+    public bool doorDone;
+    public bool shoutDone;
 
     public string dialedNumber;
 
     public bool pinRemoved;
+    public bool canExt;
 
     public GameObject particles;
 
@@ -37,24 +44,29 @@ public class GameManager : MonoBehaviour
 
     public bool keyGrabbed;
 
-
-    public float totalTime;
-    public float alarmTime;
-    public float phoneTime;
-    public float maskTime;
-    public float fireTime;
-    public float evacTime;
+    public float totalTime = 0;
+    [HideInInspector]
+    public float alarmTime = 0, phoneTime = 0, maskTime = 0, windowTime = 0, doorTime = 0, shoutTime = 0, fireTime = 0, evacTime = 0;
 
     private bool doNothing;
 
-    public int averageFight = 25;
-    public int averageEvac = 40;
+    
     public int averageAlert = 10;
     public int averageCall = 25;
     public int averageMask = 30;
-    public int averageShout = 80;
-    public int averageFire = 30;
 
+    public int averageFire = 30;
+    public int averageShout = 80;
+
+    public int averageWindow = 6;
+    public int averageDoor = 10;
+
+    public int averageFight = 115;
+    public int averageEvac = 40;
+
+    public GameObject key;
+    [HideInInspector]
+    public bool onAlarmTP, onPhoneTP, onClothTP;
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -76,15 +88,18 @@ public class GameManager : MonoBehaviour
             Rope.SetActive(true);
         }
 
-        if (pinRemoved && OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.8f)
+        if (pinRemoved && OVRInput.Get(OVRInput.Button.One) && GameManager.instance.extinguisherSize >= 0f)
         {
             OVRInput.SetControllerVibration(1, 1, OVRInput.Controller.RHand);
-            doNothing = true;
+            GameManager.instance.extinguisherSize -= Time.deltaTime;
 
-            if (!particles.GetComponent<AudioSource>().isPlaying)
+            if (!doNothing)
+            {
                 particles.GetComponent<AudioSource>().Play();
-            else if(!particles.GetComponent<ParticleSystem>().isPlaying)
                 particles.GetComponent<ParticleSystem>().Play();
+                doNothing = true;
+            }
+
         }
         else if(doNothing)
         {
@@ -98,13 +113,13 @@ public class GameManager : MonoBehaviour
     public void OnKeyGrabbed()
     {
         keyGrabbed = true;
-        if(OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.4f)
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.4f)
         {
-            this.transform.parent = rightAnchor.transform;
+            key.transform.parent = handRight.transform;
         }
         else
         {
-            this.transform.parent = leftAnchor.transform;
+            key.transform.parent = handLeft.transform;
         }
     }
 }

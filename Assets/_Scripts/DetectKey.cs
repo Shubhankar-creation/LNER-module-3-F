@@ -10,11 +10,13 @@ public class DetectKey : MonoBehaviour
     {
         if(other.gameObject.CompareTag("Key") && GameManager.instance.keyGrabbed)
         {
+            Debug.Log("ehhh");
             other.gameObject.transform.position = this.transform.position;
             other.gameObject.transform.rotation = this.transform.rotation;
             doorHandler.SetActive(true);
             other.transform.parent = this.transform.parent;
             useKeyUI.SetActive(false);
+            gameObject.GetComponent<AudioSource>().Play();
         }
     }
 
