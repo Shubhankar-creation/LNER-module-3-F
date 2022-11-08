@@ -10,12 +10,10 @@ public class GameManager : MonoBehaviour
 
     public Transform rightAnchor, leftAnchor;
     public Transform handRight, handLeft;
-    public GameObject controllers;
 
     public GameObject leftRayVisual, rightRayVisual;
     public OVRManager ovrManager;
     public GameObject Rope;
-    private bool ropeOn;
     public GameObject pickExtUI;
 
     public AudioClip callRing;
@@ -32,6 +30,7 @@ public class GameManager : MonoBehaviour
 
     public string dialedNumber;
 
+    public bool canRemovePin;
     public bool pinRemoved;
     public bool canExt;
 
@@ -45,6 +44,7 @@ public class GameManager : MonoBehaviour
     public bool keyGrabbed;
 
     public float totalTime = 0;
+
     [HideInInspector]
     public float alarmTime = 0, phoneTime = 0, maskTime = 0, windowTime = 0, doorTime = 0, shoutTime = 0, fireTime = 0, evacTime = 0;
 
@@ -67,8 +67,10 @@ public class GameManager : MonoBehaviour
     public GameObject key;
     [HideInInspector]
     public bool onAlarmTP, onPhoneTP, onClothTP;
+    public GameObject ropeMesh;
     private void Awake()
     {
+        ropeMesh = Rope.transform.GetChild(0).gameObject;
         if (instance != null && instance != this)
         {
             Destroy(this);
@@ -81,17 +83,21 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if(!ropeOn && controllers.active)
+        
+        if(!canRemovePin && rightAnchor.gameObject.active && leftAnchor.gameObject.active)
         {
-            ropeOn = true;
             pickExtUI.SetActive(true);
             Rope.SetActive(true);
+            for(int i = 0; i<ropeMesh.transform.childCount; i++)
+            {
+                ropeMesh.transform.GetChild(i).GetComponent<MeshRenderer>().enabled = false;
+            }
+
         }
 
-        if (pinRemoved && OVRInput.Get(OVRInput.Button.One) && GameManager.instance.extinguisherSize >= 0f)
+        if (pinRemoved && OVRInput.Get(OVRInput.Button.One))
         {
             OVRInput.SetControllerVibration(1, 1, OVRInput.Controller.RHand);
-            GameManager.instance.extinguisherSize -= Time.deltaTime;
 
             if (!doNothing)
             {

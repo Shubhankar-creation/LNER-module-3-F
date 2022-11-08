@@ -8,6 +8,7 @@ public class UiManager : MonoBehaviour
 {
     public UICanvasController cameraFollow;
 
+    public GameObject followUI;
     public GameObject welcomeWindow;
     public GameObject pinchTutorial;
     public GameObject directTutorial;
@@ -30,8 +31,8 @@ public class UiManager : MonoBehaviour
 
     void Start()
     {
-        cameraFollow._unmovableCanvasTransform = welcomeWindow.transform;
-        canvasPopSound = GetComponent<AudioSource>();
+/*        cameraFollow._unmovableCanvasTransform = welcomeWindow.transform;
+*/        canvasPopSound = GetComponent<AudioSource>();
         StartCoroutine(setWelcomeWindow());
     }
 
@@ -49,8 +50,8 @@ public class UiManager : MonoBehaviour
         canvasPopSound.Play();
         yield return new WaitForSeconds(5f);
         welcomeWindow.SetActive(false);
-        cameraFollow._unmovableCanvasTransform = pinchTutorial.transform;
-        pinchTutorial.SetActive(true);
+/*        cameraFollow._unmovableCanvasTransform = pinchTutorial.transform;
+*/        pinchTutorial.SetActive(true);
         canvasPopSound.Play();
     }
 
@@ -59,8 +60,8 @@ public class UiManager : MonoBehaviour
     {
         Debug.Log("Pinch pressed");
         pinchTutorial.SetActive(false);
-        cameraFollow._unmovableCanvasTransform = directTutorial.transform;
-
+/*        cameraFollow._unmovableCanvasTransform = directTutorial.transform;
+*/
         directTutorial.SetActive(true);
         canvasPopSound.Play();
     }
@@ -68,8 +69,8 @@ public class UiManager : MonoBehaviour
     public void OnDirectSelect()
     {
         directTutorial.SetActive(false);
-        cameraFollow._unmovableCanvasTransform = teleportTutorial.transform;
-
+/*        cameraFollow._unmovableCanvasTransform = teleportTutorial.transform;
+*/
         teleportTutorial.SetActive(true);
         canvasPopSound.Play();
     }
@@ -77,8 +78,8 @@ public class UiManager : MonoBehaviour
     public void OnTeleportSelect()
     {
         teleportTutorial.SetActive(false);
-        cameraFollow._unmovableCanvasTransform = StartLevel.transform;
-
+/*        cameraFollow._unmovableCanvasTransform = StartLevel.transform;
+*/
         StartLevel.SetActive(true);
         canvasPopSound.Play();
     }
@@ -86,6 +87,7 @@ public class UiManager : MonoBehaviour
     public void OnStartSelect()
     {
         StartLevel.SetActive(false);
+        followUI.SetActive(false);
         fireScene.SetActive(true);
         timeStarted = true;
     }
@@ -112,8 +114,7 @@ public class UiManager : MonoBehaviour
 
     public void OnFireLocation()
     {
-        if(GameManager.instance.onClothTP == true)
-            Precautions.SetActive(true);
+        Precautions.SetActive(true);
     }
     IEnumerator hideUI(GameObject UI)
     {
@@ -256,8 +257,15 @@ public class UiManager : MonoBehaviour
 
     public void OnPassOff()
     {
+        for (int i = 0; i < GameManager.instance.ropeMesh.transform.childCount; i++)
+        {
+            GameManager.instance.ropeMesh.transform.GetChild(i).GetComponent<MeshRenderer>().enabled = true;
+        }
+
         pickTheExt.SetActive(false);
-        grabPin.SetActive(true);
+        GameManager.instance.canRemovePin = true;
+        if (!GameManager.instance.pinRemoved)
+            grabPin.SetActive(true);
         GameManager.instance.leftRayVisual.SetActive(false);
         GameManager.instance.rightRayVisual.SetActive(false);
         GameManager.instance.ovrManager.isInsightPassthroughEnabled = false;

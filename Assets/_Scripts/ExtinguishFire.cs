@@ -15,24 +15,36 @@ public class ExtinguishFire : MonoBehaviour
     public Image bloodImage;
 
     private float bloodTime;
+
+    private float averageFireTime = 0f;
     public void Update()
     {
+
+        if (GameManager.instance.pinRemoved && averageFireTime <= 60f)
+        {
+            averageFireTime += Time.deltaTime;
+        }
+        else if (averageFireTime > 60f)
+        {
+            GameManager.instance.pinRemoved = false;
+            DisplayReport();
+            ReportUI.SetActive(true);
+            GameManager.instance.canExt = false;
+            this.gameObject.GetComponent<ExtinguishFire>().enabled = false;
+        }
+
         if (GameManager.instance.canExt && GameManager.instance.pinRemoved && OVRInput.Get(OVRInput.Button.One))
         {
-            if(GameManager.instance.particles.CompareTag("CO2"))
+            if(GameManager.instance.particles.CompareTag("CO2") || GameManager.instance.particles.CompareTag("Dry"))
             {
-                ReduceFire(0.0046f);
-            }
-            else if (GameManager.instance.particles.CompareTag("Dry"))
-            {
-                ReduceFire(0.0027f);
+                ReduceFire(0.0075f);
             }
             else
             {
                 bloodTime += Time.deltaTime;
                 if (bloodTime < GameManager.instance.wrongExtTime)
                 {
-                    var newColor = new Color(1.0f, 0f, 0f, bloodImage.color.a + 0.005f);
+                    var newColor = new Color(1.0f, 0f, 0f, bloodImage.color.a + 0.01f);
                     bloodImage.color = newColor;
                 }
                 else
@@ -43,16 +55,20 @@ public class ExtinguishFire : MonoBehaviour
                 }
             }
         }
-        else if(GameManager.instance.extinguisherSize <=0)
+        /*else if(GameManager.instance.extinguisherSize <=0)
         {
             DisplayReport();
             ReportUI.SetActive(true);
-        }
+            GameManager.instance.canExt = false;
+            this.gameObject.GetComponent<ExtinguishFire>().enabled = false;
+        }*/
     }
 
     void ReduceFire(float val)
     {
-        for(int i =0; i<12;i++)
+        GameManager.instance.extinguisherSize -= Time.deltaTime;
+
+        for (int i =0; i<12;i++)
         {
             if(Fire.transform.GetChild(i).localScale.x > 0)
             {

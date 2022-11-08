@@ -10,7 +10,7 @@ public class PinRemover : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if(other.gameObject.CompareTag("Pin"))
+        if(other.gameObject.CompareTag("Pin") && GameManager.instance.canRemovePin)
         {
             if(OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) > 0.2f)
             {
@@ -28,7 +28,7 @@ public class PinRemover : MonoBehaviour
 
     IEnumerator setSparyUnactive()
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(2.5f);
         sprayExt.SetActive(false);
     }
 }
